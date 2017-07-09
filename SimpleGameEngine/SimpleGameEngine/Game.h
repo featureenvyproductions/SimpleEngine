@@ -20,9 +20,9 @@ public:
 
 	//do the right stuff depending on the game state
 	//we'll pretty much always be in the running state except for some specific circumstances though
-	virtual GAMESTATE GameLoop();
+	GAMESTATE GameLoop();
 	
-	virtual GAMESTATE HandleInput();
+	GAMESTATE HandleInput();
 
 	GAMESTATE Update();
 
