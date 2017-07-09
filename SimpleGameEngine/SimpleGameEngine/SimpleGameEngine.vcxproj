@@ -125,10 +125,13 @@
   <ItemGroup>
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Screen.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="StateContainer.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

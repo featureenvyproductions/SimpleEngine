@@ -27,3 +27,13 @@ enum DIRECTION
 	DIR_SOUTH = 6,
 	DIR_SOUTHEAST = 7
 };
+
+
+enum GAMESTATE
+{
+	STATE_STARTING = 0,	//game object has just been created
+	STATE_LOAD_FAIL = 1,	//stuff fails to initialize
+	STATE_RUNNING = 2,	//initialization successful. normal typical wandering around doing stuff
+	STATE_TRANSITION = 3, //switching rooms, suspend input temporarily, some reinitialization needed
+	STATE_EXITING = 4		//stuff is shutting down and getting cleaned up.
+};
