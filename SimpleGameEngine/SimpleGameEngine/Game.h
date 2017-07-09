@@ -3,6 +3,8 @@
 
 class Game
 {
+private:
+	std::unique_ptr<Game > m_instance;
 protected:
 	GAMESTATE m_nState;
 	std::unique_ptr<CScreen> m_screen;
@@ -10,6 +12,16 @@ protected:
 	std::string m_strStateContainerID;
 	std::map<std::string, CStateContainer*> m_stateContainers;
 public:
+
+	Game * GetInstance()
+	{
+		if (m_instance.get() == nullptr)
+		{
+			m_instance.reset(new Game());
+		}
+		return m_instance.get();
+	}
+
 	Game();
 	
 	~Game();

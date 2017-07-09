@@ -7,16 +7,16 @@ int main()
 	t0 = clock();
 
 	Game mygame;
-	if (mygame.Init() == STATE_LOAD_FAIL)
+	if (mygame.GetInstance()->Init() == STATE_LOAD_FAIL)
 		return -1;
 
-	while (mygame.GetState() != STATE_EXITING)
+	while (mygame.GetInstance()->GetState() != STATE_EXITING)
 	{
 
 		if ((clock() - t0) > (CLOCKS_PER_SEC / FRAME_RATE))
 		{
 			t0 = clock();
-			mygame.GameLoop();
+			mygame.GetInstance()->GameLoop();
 		}
 	}
 	system("PAUSE");
