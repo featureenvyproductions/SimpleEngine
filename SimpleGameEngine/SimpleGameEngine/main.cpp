@@ -125,31 +125,28 @@ enum GAMESTATE
 	STATE_EXITING = 4		//stuff is shutting down and getting cleaned up.
 };
 
-//a room or menu with its own rules for input handling and stuff to draw
-//this base class is for a normal, wandering around doing whatever room
-//i mean really this isn't a "room", it's like...a state container or something. but I felt like 
-//i would lose my fucking mind less if i had to type out CRoom a thousand times
-//as opposed to CStateContainer or some shit
-//tbr...eventually "rooms" will be loaded from somewhere like an xml file or something
-class CRoom
+//a room or menu with its own rules for input handling and stuff to draw.
+//Basically is its own game state.
+//I call it a room everywhere out of habit
+class CStateContainer
 {
 protected:
 	std::string m_strID; //unique id for the room or menu so we can find it in a map later
 	std::vector<CObject *> objects; //objects associated with this room
 public:
 	
-	CRoom()
+	CStateContainer()
 	{
 	}
 
 	/*! Gives room specified id*/
-	CRoom(std::string id)
+	CStateContainer(std::string id)
 	{
 		m_strID = id;
 	}
 
 	/*! Currently just deletes created objects. Called when room is left. Really should save the state of persistent objects though.*/
-	~CRoom()
+	~CStateContainer()
 	{
 		for (int i = 0; i < objects.size(); i++)
 		{
@@ -191,14 +188,14 @@ public:
 					printf("\nnormally we'd bring up the inventory here and pause\n");
 					printf("assuming we're in normal game mode. whether we can bring up menus\n");
 					printf("might depend on game state or a room check or something.\n");
-					//nextRoom = "Inventory";
+					//nextState = STATE_INVENTORY;
 				}
 				break;
 				case SDLK_LCTRL:
 				case SDLK_RCTRL:
 				{
 					printf("\nhere if we're in the right state, we'd bring up the save menu\n");
-					//	nextRoom = "SaveLoad";
+					//	nextState = STATE_MENU_SAVELOAD;
 				}
 				break;
 				default:
@@ -296,8 +293,8 @@ protected:
 	GAMESTATE m_nState;
 	std::unique_ptr<CScreen> m_screen;
 	std::vector<CObject *> objects; //stuff that needs to be drawn. obviously will change. will mostly be used for permanent objects like player
-	std::string m_strRoomID;
-	std::map<std::string, CRoom*> m_rooms;
+	std::string m_strStateContainerID;
+	std::map<std::string, CStateContainer*> m_stateContainers;
 public:
 	Game()
 	{
@@ -312,7 +309,7 @@ public:
 			if (objects.at(i) != NULL)
 				delete objects.at(i);
 		}
-		for (std::map<std::string, CRoom *>::iterator it = m_rooms.begin(); it != m_rooms.end(); ++it)
+		for (std::map<std::string, CStateContainer *>::iterator it = m_stateContainers.begin(); it != m_stateContainers.end(); ++it)
 		{
 			if ((*it).second != NULL)
 				delete (*it).second;
@@ -334,16 +331,16 @@ public:
 		{
 			(*it)->Init();
 		}
-		m_strRoomID = "TestRoom";
-		m_rooms[m_strRoomID] = new CRoom(m_strRoomID); //add a test room
+		m_strStateContainerID = "TestRoom";
+		m_stateContainers[m_strStateContainerID] = new CStateContainer(m_strStateContainerID); //add a test room
 
 													   //for when we're loading the objects from config files in the future
-		if ((objects.size() == 0) || (m_rooms.size() == 0))
+		if ((objects.size() == 0) || (m_stateContainers.size() == 0))
 			m_nState = STATE_LOAD_FAIL;
 		else
 		{
 			m_nState = STATE_RUNNING;
-			m_rooms[m_strRoomID]->Init();
+			m_stateContainers[m_strStateContainerID]->Init();
 		}
 
 		return m_nState;
@@ -369,8 +366,8 @@ public:
 		break;
 		case STATE_TRANSITION: //we're loading a new room.
 		{
-			m_strRoomID = m_rooms[m_strRoomID]->GetTransitionData();
-			if (m_rooms.find(m_strRoomID) == m_rooms.end())
+			m_strStateContainerID = m_stateContainers[m_strStateContainerID]->GetTransitionData();
+			if (m_stateContainers.find(m_strStateContainerID) == m_stateContainers.end())
 			{
 				//either we're exiting or a thing happened so....
 				//eventually prompt the user to save though of course
@@ -380,7 +377,7 @@ public:
 			{
 				//tbr...save the previous room persistent items first
 				//also check if room is already initialized
-				m_rooms[m_strRoomID]->Init();
+				m_stateContainers[m_strStateContainerID]->Init();
 			}
 		}
 		break;
@@ -458,7 +455,7 @@ public:
 			{
 				(*it)->HandleInput(event);
 			}
-			m_nState = m_rooms[m_strRoomID]->HandleInput(objects);
+			m_nState = m_stateContainers[m_strStateContainerID]->HandleInput(objects);
 		}
 		return m_nState;
 	}
@@ -470,7 +467,7 @@ public:
 		{
 			(*it)->Update("Test room");
 		}*/
-		return m_rooms[m_strRoomID]->Update(objects);
+		return m_stateContainers[m_strStateContainerID]->Update(objects);
 	}
 
 	void Draw()
@@ -482,7 +479,7 @@ public:
 		{
 			(*it)->Draw();
 		}
-		m_rooms[m_strRoomID]->Draw(); //tbr...i actually want room to be responsible for drawing
+		m_stateContainers[m_strStateContainerID]->Draw(); //tbr...i actually want room to be responsible for drawing
 		Utils::EndDraw();
 	}
 };
